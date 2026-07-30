@@ -9,7 +9,7 @@
 
 ### Description
 
-Synology package to log CPU temperature to help troubleshooting Synology shutting down due to overheating
+Synology DSM 7 and DSM 6 packages to log CPU temperature to help troubleshooting Synology shutting down due to overheating
 
 ### Download the script
 
