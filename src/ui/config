@@ -14,11 +14,6 @@
       "type": "lib",
       "title": "CPU Temperature",
       "icon": "images/icon_{0}.png"
-    },
-    "SYNO.SDS.CPUTemp.SettingsWindow": {
-      "type": "lib",
-      "title": "CPU Temperature Settings",
-      "icon": "images/icon_{0}.png"
     }
   }
 }

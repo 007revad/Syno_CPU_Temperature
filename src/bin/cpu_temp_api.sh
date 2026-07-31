@@ -31,8 +31,14 @@ fi
 SCRIPT="${BIN_DIR}/syno_cpu_temp.sh"
 CONF_FILE="${VAR_DIR}/syno_cpu_temp.conf"
 LOG_FILE="${VAR_DIR}/syno_cpu_temp.log"
-
 DEFAULT_LOG_DAYS=7
+
+if [[ ! -f "$CONF_FILE" ]]; then
+    touch "$CONF_FILE"
+    synosetkeyvalue "$CONF_FILE" Log ""
+    synosetkeyvalue "$CONF_FILE" Log_Days 7
+    synosetkeyvalue "$CONF_FILE" Log_Repeat_Hour "1"
+fi
 
 ACTION="$1"
 shift
@@ -111,9 +117,11 @@ with open('${LOG_FILE}') as f:
 getsettings)
     LOG_ENABLED=$(synogetkeyvalue "$CONF_FILE" Log 2>/dev/null)
     LOG_DAYS=$(synogetkeyvalue "$CONF_FILE" Log_Days 2>/dev/null)
+    LOG_REPEAT_HOUR=$(synogetkeyvalue "$CONF_FILE" Log_Repeat_Hour 2>/dev/null)
     [ -n "$LOG_DAYS" ] || LOG_DAYS="$DEFAULT_LOG_DAYS"
+    [ -n "$LOG_REPEAT_HOUR" ] || LOG_REPEAT_HOUR="1"
     if [[ "${LOG_ENABLED,,}" == "yes" ]]; then ENABLED_JSON=true; else ENABLED_JSON=false; fi
-    echo "{\"success\":true,\"log_enabled\":${ENABLED_JSON},\"log_days\":${LOG_DAYS}}"
+    echo "{\"success\":true,\"log_enabled\":${ENABLED_JSON},\"log_days\":${LOG_DAYS},\"frequency\":${LOG_REPEAT_HOUR}}"
     ;;
 
 setsettings)
@@ -130,36 +138,10 @@ setsettings)
         exit 1
     fi
 
-    python3 -c "
-conf_file = '${CONF_FILE}'
-log_enabled = '${LOG_ENABLED}'
-log_days = '${LOG_DAYS}'
+    synosetkeyvalue "$CONF_FILE" Log "$LOG_ENABLED"
+    synosetkeyvalue "$CONF_FILE" Log_Days "$LOG_DAYS"
+    synosetkeyvalue "$CONF_FILE" Log_Repeat_Hour "$FREQUENCY"
 
-with open(conf_file) as f:
-    lines = f.readlines()
-
-seen = {'Log': False, 'Log_Days': False}
-out = []
-for line in lines:
-    if line.startswith('Log='):
-        out.append(f'Log={log_enabled}\n')
-        seen['Log'] = True
-    elif line.startswith('Log_Days='):
-        out.append(f'Log_Days={log_days}\n')
-        seen['Log_Days'] = True
-    else:
-        out.append(line)
-
-if not seen['Log']:
-    out.append(f'Log={log_enabled}\n')
-if not seen['Log_Days']:
-    out.append(f'Log_Days={log_days}\n')
-
-with open(conf_file, 'w') as f:
-    f.writelines(out)
-" 2>>"${VAR_DIR}/api.log"
-
-    mkdir -p "$VAR_DIR"
     prune_log
 
     TASK_SETUP="${BIN_DIR}/task_setup.sh"

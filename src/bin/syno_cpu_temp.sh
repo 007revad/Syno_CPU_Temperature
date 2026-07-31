@@ -15,7 +15,8 @@ scriptname=syno_cpu_temp
 echo "$script $scriptver"
 
 # Get NAS model
-model=$(cat /proc/sys/kernel/syno_hw_version)
+#model=$(cat /proc/sys/kernel/syno_hw_version)
+model=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/synoinfo.conf upnpmodelname)
 
 # Get DSM full version
 productversion=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION productversion)
@@ -29,21 +30,19 @@ if [[ $smallfixnumber -gt "0" ]]; then smallfix="-$smallfixnumber"; fi
 echo -e "${model} DSM $productversion-$buildnumber$smallfix $buildphase"
 
 # Show CPU arch
-/usr/syno/bin/synogetkeyvalue /etc.defaults/synoinfo.conf unique
+#/usr/syno/bin/synogetkeyvalue /etc.defaults/synoinfo.conf unique
 
 # Get DSM major version
 dsm=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION majorversion)
 
-# Read variables from syno_cpu_temp.conf
 Log="yes"
 if [[ $dsm -ge 7 ]]; then
-    Log_File="/var/packages/CPUTemp/var/cpu_temp.log"
+    Log_File="/var/packages/CPUTemp/var/syno_cpu_temp.log"
 else
-    Log_File="/var/packages/CPUTemp/etc/cpu_temp.log"
+    Log_File="/var/packages/CPUTemp/etc/syno_cpu_temp.log"
 fi
 
 now="$(date +"%Y-%m-%d %H:%M:%S") - "
-Log_File="${Log_Directory}/${scriptname}.log"
 
 #------------------------------------------------------------------------------
 
@@ -190,12 +189,13 @@ fi
 if [[ ${Log,,} == "yes" ]]; then
     # Add header to log if log file does not already exist
     if [[ ! -f "$Log_File" ]]; then
-        echo "$script $scriptver" > "$Log_File"
-        echo -e "${model} DSM $productversion-$buildnumber$smallfix $buildphase" >> "$Log_File"
+        #echo "$script $scriptver" > "$Log_File"
+        #echo -e "${model} DSM $productversion-$buildnumber$smallfix $buildphase" >> "$Log_File"
+        echo -e "${model} DSM $productversion-$buildnumber$smallfix $buildphase" > "$Log_File"
         # Log CPU model
         #echo >> "$Log_File"
         if [[ -n $cpu_model ]]; then
-            echo "$cpu_model" >> "$Log_File"
+            echo "CPU Platform: $cpu_model" >> "$Log_File"
         else
             echo "Unknown CPU model" >> "$Log_File"
         fi
