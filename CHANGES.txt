@@ -1,5 +1,8 @@
+v1.0.2 BETA
+- Beta release
+
 v1.0.1 BETA
-- Second beta release.
+- Beta release.
 
 v1.0.0 BETA
-- First beta release.
+- Beta release.

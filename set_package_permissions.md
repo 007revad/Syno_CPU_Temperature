@@ -22,7 +22,7 @@ cat "$file"
 1. Go to **Control Panel** > **Task Scheduler** > click **Create** > and select **Scheduled Task**.
 2. Select **User-defined script**.
 3. Enter a task name.
-4. Select **root** as the user (Syno Source Manager needs to run with elevated permissions).
+4. Select **root** as the user (Syno CPU Temperature needs to run with elevated permissions).
 5. Untick **Enable** so it does **not** run on a schedule.
 6. Click **Task Settings**.
 7. In the box under **User-defined script** copy and paste the following. 

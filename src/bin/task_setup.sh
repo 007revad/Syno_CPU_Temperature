@@ -28,14 +28,15 @@ PKG_NAME="CPUTemp"
 PKG_DEST="/var/packages/${PKG_NAME}/target"
 TASK_NAME="CPUTemp_scheduled"
 COMMAND="${PKG_DEST}/bin/cpu_temp_api.sh run"
-VAR_DIR="/var/packages/${PKG_NAME}/var"
 
 # Same DSM-major-version detection syno_cpu_temp.sh itself uses.
 dsm=$(get_key_value /etc.defaults/VERSION majorversion)
 if [[ $dsm -ge 7 ]]; then
+    VAR_DIR="/var/packages/${PKG_NAME}/var"
     API_VER=4
 else
     API_VER=1
+    VAR_DIR="/var/packages/${PKG_NAME}/etc"
 fi
 
 find_task_id() {

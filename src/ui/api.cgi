@@ -9,12 +9,19 @@ PKG_NAME="CPUTemp"
 PKG_ROOT="/var/packages/${PKG_NAME}"
 TARGET_DIR="${PKG_ROOT}/target"
 BIN_DIR="${TARGET_DIR}/bin"
-VAR_DIR="${PKG_ROOT}/var"
+
+# Get DSM major version
+dsm=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION majorversion)
+if [[ $dsm -ge 7 ]]; then
+    VAR_DIR="${PKG_ROOT}/var"
+else
+    VAR_DIR="${PKG_ROOT}/etc"
+fi
+
 LOG_FILE="${VAR_DIR}/api.log"
 
 API_SCRIPT="${BIN_DIR}/cpu_temp_api.sh"
 
-mkdir -p "${VAR_DIR}"
 touch "${LOG_FILE}"
 chmod 644 "${LOG_FILE}"
 
