@@ -1,0 +1,24 @@
+{
+  "main.js": {
+    "SYNO.SDS._ThirdParty.App.CPUTemp": {
+      "type": "app",
+      "title": "CPU Temperature",
+      "desc": "Get and log Synology NAS CPU temperature",
+      "icon": "images/icon_{0}.png",
+      "appWindow": "SYNO.SDS.CPUTemp.MainWindow",
+      "allowMultiInstance": false,
+      "allowStandalone": true,
+      "allUsers": true
+    },
+    "SYNO.SDS.CPUTemp.MainWindow": {
+      "type": "lib",
+      "title": "CPU Temperature",
+      "icon": "images/icon_{0}.png"
+    },
+    "SYNO.SDS.CPUTemp.SettingsWindow": {
+      "type": "lib",
+      "title": "CPU Temperature Settings",
+      "icon": "images/icon_{0}.png"
+    }
+  }
+}
