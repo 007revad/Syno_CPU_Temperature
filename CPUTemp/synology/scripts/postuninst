@@ -1,4 +1,0 @@
-#!/bin/sh
-PKG_NAME="CPUTemp"
-rm -f "/etc/sudoers.d/${PKG_NAME}"
-exit 0
