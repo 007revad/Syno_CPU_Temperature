@@ -1,8 +1,8 @@
 {
   "package": "CPUTemp",
   "name": "CPUTemp",
-  "version": "1.0.0",
-  "description": "Package to log CPU temperature to help troubleshooting Synology shutting down due to overheating",
+  "version": "1.0.1",
+  "description": "Package to log CPU temperature to help troubleshooting Synology randomly shutting down due to overheating",
   "target": "./src",
   "install_type": "package",
   "install_dep_packages": "",

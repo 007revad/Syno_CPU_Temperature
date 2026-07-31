@@ -9,10 +9,10 @@ sudo -i
 pkg=CPUTemp
 file=/etc/sudoers.d/CPUTemp
 script=/var/packages/CPUTemp/target/bin/cpu_temp_api.sh
-echo "$pkg ALL=(root) NOPASSWD: $script" run >> "$file"
-echo "$pkg ALL=(root) NOPASSWD: $script" getlog >> "$file"
-echo "$pkg ALL=(root) NOPASSWD: $script" getsettings >> "$file"
-echo "$pkg ALL=(root) NOPASSWD: $script" setsettings * >> "$file"
+echo "$pkg ALL=(root) NOPASSWD: $script run" > "$file"
+echo "$pkg ALL=(root) NOPASSWD: $script getlog" >> "$file"
+echo "$pkg ALL=(root) NOPASSWD: $script getsettings" >> "$file"
+echo "$pkg ALL=(root) NOPASSWD: $script setsettings *" >> "$file"
 chmod 0440 "$file"
 cat "$file"
 ```
@@ -30,10 +30,10 @@ cat "$file"
     pkg=CPUTemp
     file=/etc/sudoers.d/CPUTemp
     script=/var/packages/CPUTemp/target/bin/cpu_temp_api.sh
-    echo "$pkg ALL=(root) NOPASSWD: $script" run >> "$file"
-    echo "$pkg ALL=(root) NOPASSWD: $script" getlog >> "$file"
-    echo "$pkg ALL=(root) NOPASSWD: $script" getsettings >> "$file"
-    echo "$pkg ALL=(root) NOPASSWD: $script" setsettings * >> "$file"
+    echo "$pkg ALL=(root) NOPASSWD: $script run" > "$file"
+    echo "$pkg ALL=(root) NOPASSWD: $script getlog" >> "$file"
+    echo "$pkg ALL=(root) NOPASSWD: $script getsettings" >> "$file"
+    echo "$pkg ALL=(root) NOPASSWD: $script "setsettings *" >> "$file"
     chmod 0440 "$file"
     cat "$file"
     ```

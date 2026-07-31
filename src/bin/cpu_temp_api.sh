@@ -19,10 +19,17 @@
 PKG_NAME="CPUTemp"
 PKG_ROOT="/var/packages/${PKG_NAME}"
 BIN_DIR="${PKG_ROOT}/target/bin"
-VAR_DIR="${PKG_ROOT}/var"
 
-CONF_FILE="${BIN_DIR}/syno_cpu_temp.conf"
+# Get DSM major version
+dsm=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION majorversion)
+if [[ $dsm -ge 7 ]]; then
+    VAR_DIR="${PKG_ROOT}/var"
+else
+    VAR_DIR="${PKG_ROOT}/etc"
+fi
+
 SCRIPT="${BIN_DIR}/syno_cpu_temp.sh"
+CONF_FILE="${VAR_DIR}/syno_cpu_temp.conf"
 LOG_FILE="${VAR_DIR}/syno_cpu_temp.log"
 
 DEFAULT_LOG_DAYS=7

@@ -1,2 +1,5 @@
-v1.0.0
-- First release.
+v1.0.1 BETA
+- Second beta release.
+
+v1.0.0 BETA
+- First beta release.

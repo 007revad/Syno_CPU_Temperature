@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-
-#----------------------------------------------------------
-# Display CPU temperature and each core's temperature
+#--------------------------------------------------------------------
+# Display and log CPU temperature and each core's temperature
 #
-# Github: https://github.com/007revad/Synology_CPU_temp
-# Script verified at https://www.shellcheck.net/
-#----------------------------------------------------------
+# Github: https://github.com/007revad/Syno_CPU_temperature
+#--------------------------------------------------------------------
 
 scriptver="v2.3.12"
 script=Synology_CPU_temp
@@ -31,54 +29,22 @@ if [[ $smallfixnumber -gt "0" ]]; then smallfix="-$smallfixnumber"; fi
 echo -e "${model} DSM $productversion-$buildnumber$smallfix $buildphase"
 
 # Show CPU arch
-synogetkeyvalue /etc.defaults/synoinfo.conf unique
+/usr/syno/bin/synogetkeyvalue /etc.defaults/synoinfo.conf unique
 
 # Get DSM major version
-dsm=$(get_key_value /etc.defaults/VERSION majorversion)
+dsm=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION majorversion)
 
 # Read variables from syno_cpu_temp.conf
-if [[ -f $(dirname -- "$0";)/${scriptname}.conf ]];then
-    Log_Directory=$(synogetkeyvalue "$(dirname -- "$0";)/${scriptname}.conf" Log_Directory)
-    Log=$(synogetkeyvalue "$(dirname -- "$0";)/${scriptname}.conf" Log)
+Log="yes"
+if [[ $dsm -ge 7 ]]; then
+    Log_File="/var/packages/CPUTemp/var/cpu_temp.log"
 else
-    echo "${scriptname}.conf file missing!"
-    exit 1
+    Log_File="/var/packages/CPUTemp/etc/cpu_temp.log"
 fi
 
-# Check if backup directory exists
-if [[ ${Log,,} == "yes" ]]; then
-    if [[ ! -d $Log_Directory ]]; then
-        echo -e "\nWARNING Log directory not found: $Log_Directory"
-        echo -e "Check your setting in syno_cpu_temp.conf\n"
-        exit 1
-    else
-        echo -e "Logging to $Log_Directory\n"
-        now="$(date +"%Y-%m-%d %H:%M:%S") - "
-        Log_File="${Log_Directory}/${scriptname}.log"
-    fi
-fi
+now="$(date +"%Y-%m-%d %H:%M:%S") - "
+Log_File="${Log_Directory}/${scriptname}.log"
 
-#------------------------------------------------------------------------------
-# Check latest release with GitHub API
-# Get latest release info
-# Curl timeout options:
-# https://unix.stackexchange.com/questions/94604/does-curl-have-a-timeout
-#release=$(curl --silent -m 10 --connect-timeout 5 \
-#    "https://api.github.com/repos/$repo/releases/latest")
-
-# Use wget to avoid installing curl in Ubuntu
-release=$(wget -qO- -q --connect-timeout=5 \
-    "https://api.github.com/repos/$repo/releases/latest")
-
-# Release version
-tag=$(echo "$release" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-#shorttag="${tag:1}"
-
-if ! printf "%s\n%s\n" "$tag" "$scriptver" |
-    sort --check=quiet --version-sort >/dev/null ; then
-    echo -e "\nThere is a newer version of this script available." |& tee -a "$Log_File"
-    echo -e "Current version: ${scriptver}\nLatest version: $tag" |& tee -a "$Log_File"
-fi
 #------------------------------------------------------------------------------
 
 pad_len(){
@@ -158,7 +124,7 @@ f2c(){
 #    cpu_model=$(grep -E '^Processor' /proc/cpuinfo | uniq | cut -d":" -f2 | xargs)
 #fi
 #if [[ -z $cpu_model ]]; then
-    cpu_model=$(synogetkeyvalue /etc.defaults/synoinfo.conf unique | cut -d"_" -f2)
+    cpu_model=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/synoinfo.conf unique | cut -d"_" -f2)
 #fi
 
 # Failed to get CPU model
