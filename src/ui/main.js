@@ -68,11 +68,13 @@ Ext.define("SYNO.SDS.CPUTemp.MainWindow", {
     buildHtml: function() {
         return [
             '<style>',
+            '  .cputemp-log { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }',
             '  .cputemp-body { display:flex; flex-direction:column; height:100%; padding:8px; box-sizing:border-box; position:relative; }',
             '  .cputemp-toolbar { flex:0 0 auto; padding-bottom:8px; display:flex; align-items:center; gap:8px; }',
-            '  .cputemp-toolbar button { padding:4px 10px; cursor:pointer; }',
-            '  .cputemp-status { font-size:12px; color:#888; }',
-            '  .cputemp-log { flex:1 1 auto; margin:0; overflow:auto; background:#1e1e1e; color:#ddd; padding:8px; font-family:Consolas,Menlo,monospace; font-size:12px; white-space:pre-wrap; border-radius:4px; }',
+            '  .cputemp-toolbar button { padding:5px 18px; cursor:pointer; border-radius:4px; font-size:13px; font-weight:bold; border:1px solid #ccc; background-color:#fff; color:#555; }',
+            '  .cputemp-toolbar button:hover { border:1px solid #aaa; background-color:#f0f0f0; }',
+            '  .cputemp-status { font-size:13px; color:#888; }',
+            '  .cputemp-log { flex:1 1 auto; margin:0; overflow:auto; background:#161eb5; color:#ddd; padding:8px; font-family:Verdana,Arial,sans-serif; font-size:12px; white-space:pre-wrap; border-radius:4px; }',
             '  .cputemp-modal-backdrop { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; }',
             '  .cputemp-modal-backdrop.open { display:flex; }',
             '  .cputemp-modal { position:relative; background:#fff; color:#222; width:340px; padding:20px; border-radius:6px; box-shadow:0 4px 24px rgba(0,0,0,0.35); }',
@@ -81,12 +83,17 @@ Ext.define("SYNO.SDS.CPUTemp.MainWindow", {
             '  .cputemp-row { margin-bottom:14px; }',
             '  .cputemp-row label { display:inline-block; margin-bottom:4px; }',
             '  .cputemp-settings-buttons { text-align:right; margin-top:6px; }',
-            '  .cputemp-settings-buttons button { padding:5px 14px; margin-left:8px; cursor:pointer; }',
+            '  .cputemp-settings-buttons button { padding:5px 18px; margin-left:8px; cursor:pointer; border-radius:4px; font-size:13px; font-weight:bold; }',
+            '  .cputemp-cancel { border:1px solid #ccc; background-color:#fff; color:#555; }',
+            '  .cputemp-cancel:hover { border:1px solid #aaa; background-color:#f0f0f0; }',
+            '  .cputemp-save { border:1px solid #1B8AED; background-color:#1B8AED; color:#fff; }',
+            '  .cputemp-save:hover { border:1px solid #057FEB; background-color:#057FEB; }',
             '  .cputemp-settings-status { font-size:12px; color:#888; min-height:16px; }',
             '</style>',
             '<div class="cputemp-body">',
             '  <div class="cputemp-toolbar">',
             '    <button type="button" class="cputemp-refresh">Refresh</button>',
+            '    <button type="button" class="cputemp-clear">Clear</button>',
             '    <button type="button" class="cputemp-settings">Settings</button>',
             '    <span class="cputemp-status"></span>',
             '  </div>',
@@ -119,8 +126,8 @@ Ext.define("SYNO.SDS.CPUTemp.MainWindow", {
             '      </div>',
             '      <div class="cputemp-row cputemp-settings-status"></div>',
             '      <div class="cputemp-row cputemp-settings-buttons">',
-            '        <button type="button" class="cputemp-save">Save</button>',
             '        <button type="button" class="cputemp-cancel">Cancel</button>',
+            '        <button type="button" class="cputemp-save">Save</button>',
             '      </div>',
             '    </div>',
             '  </div>',
@@ -139,6 +146,9 @@ Ext.define("SYNO.SDS.CPUTemp.MainWindow", {
         this.settingsStatusEl = el.querySelector(".cputemp-settings-status");
 
         Ext.fly(el.querySelector(".cputemp-refresh")).on("click", this.runAndLoad, this);
+        Ext.each(el.querySelectorAll(".cputemp-clear"), function(btn) {
+            Ext.fly(btn).on("click", this.clearLog, this);
+        }, this);
         Ext.fly(el.querySelector(".cputemp-settings")).on("click", this.openSettings, this);
         Ext.fly(el.querySelector(".cputemp-modal-close")).on("click", this.closeSettings, this);
         Ext.fly(el.querySelector(".cputemp-cancel")).on("click", this.closeSettings, this);
@@ -147,6 +157,13 @@ Ext.define("SYNO.SDS.CPUTemp.MainWindow", {
         Ext.fly(this.backdropEl).on("click", function(ev) {
             if (ev.getTarget() === this.backdropEl) { this.closeSettings(); }
         }, this);
+
+        // DSM's desktop chrome suppresses the native right-click menu
+        // globally (likely a document-level listener, same instinct as
+        // the user-select:none override above). Stopping propagation
+        // here keeps it from reaching that handler, so Copy etc. shows
+        // up normally over our own content.
+        Ext.fly(el).on("contextmenu", function(ev) { ev.stopPropagation(); });
 
         this.runAndLoad();
     },
@@ -188,6 +205,17 @@ Ext.define("SYNO.SDS.CPUTemp.MainWindow", {
             this.logEl.textContent = text || "(log is empty)";
             this.logEl.scrollTop = this.logEl.scrollHeight;
         }
+    },
+
+    clearLog: function() {
+        this.setStatus("Clearing\u2026");
+        SYNO.SDS.CPUTemp.apiCall("clearlog", {}, (function(resp) {
+            if (resp && resp.success) {
+                this.runAndLoad();
+            } else {
+                this.setStatus((resp && resp.message) || "Failed to clear log");
+            }
+        }).createDelegate(this));
     },
 
     openSettings: function() {

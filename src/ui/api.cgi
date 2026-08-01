@@ -125,6 +125,16 @@ getlog)
     fi
     ;;
 
+clearlog)
+    run_privileged clearlog
+    if [ "$RUN_RC" -ne 0 ]; then
+        log "[ERROR] clearlog failed (rc=${RUN_RC}): ${RUN_OUT}"
+        json_response false "Could not clear log" ""
+    else
+        echo "$RUN_OUT"
+    fi
+    ;;
+
 getsettings)
     run_privileged getsettings
     if [ "$RUN_RC" -ne 0 ] || [ -z "$RUN_OUT" ]; then

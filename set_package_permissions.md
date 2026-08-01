@@ -11,6 +11,7 @@ file=/etc/sudoers.d/CPUTemp
 script=/var/packages/CPUTemp/target/bin/cpu_temp_api.sh
 echo "$pkg ALL=(root) NOPASSWD: $script run" > "$file"
 echo "$pkg ALL=(root) NOPASSWD: $script getlog" >> "$file"
+echo "$pkg ALL=(root) NOPASSWD: $script clearlog" >> "$file"
 echo "$pkg ALL=(root) NOPASSWD: $script getsettings" >> "$file"
 echo "$pkg ALL=(root) NOPASSWD: $script setsettings *" >> "$file"
 chmod 0440 "$file"
@@ -32,6 +33,7 @@ cat "$file"
     script=/var/packages/CPUTemp/target/bin/cpu_temp_api.sh
     echo "$pkg ALL=(root) NOPASSWD: $script run" > "$file"
     echo "$pkg ALL=(root) NOPASSWD: $script getlog" >> "$file"
+    echo "$pkg ALL=(root) NOPASSWD: $script clearlog" >> "$file"
     echo "$pkg ALL=(root) NOPASSWD: $script getsettings" >> "$file"
     echo "$pkg ALL=(root) NOPASSWD: $script "setsettings *" >> "$file"
     chmod 0440 "$file"

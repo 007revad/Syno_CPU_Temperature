@@ -114,6 +114,15 @@ with open('${LOG_FILE}') as f:
     fi
     ;;
 
+clearlog)
+    # rm rather than truncate: syno_cpu_temp.sh only writes its header
+    # block when the log file doesn't already exist, so a truncated
+    # (but still present) empty file would skip the header on the
+    # next run.
+    rm -f "$LOG_FILE"
+    echo '{"success":true}'
+    ;;
+
 getsettings)
     LOG_ENABLED=$(synogetkeyvalue "$CONF_FILE" Log 2>/dev/null)
     LOG_DAYS=$(synogetkeyvalue "$CONF_FILE" Log_Days 2>/dev/null)
@@ -148,7 +157,7 @@ setsettings)
     if [[ "$LOG_ENABLED" == "yes" && -n "$FREQUENCY" ]]; then
         "$TASK_SETUP" set "$FREQUENCY" >>"${VAR_DIR}/api.log" 2>&1
     else
-        "$TASK_SETUP" disable >>"${VAR_DIR}/api.log" 2>&1
+        "$TASK_SETUP" remove >>"${VAR_DIR}/api.log" 2>&1
     fi
 
     echo '{"success":true}'
