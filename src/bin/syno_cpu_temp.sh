@@ -14,7 +14,7 @@ scriptname=syno_cpu_temp
 #echo -e "$script $scriptver\ngithub.com/$repo\n"
 echo "$script $scriptver"
 
-# Get NAS model
+# Get NAS model 
 #model=$(cat /proc/sys/kernel/syno_hw_version)
 model=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/synoinfo.conf upnpmodelname)
 
