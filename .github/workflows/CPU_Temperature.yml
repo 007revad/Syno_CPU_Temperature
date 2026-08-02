@@ -150,7 +150,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Read package ID from package.json
+          # Read package ID from package.json 
           # package.json may be at the repo root or under synology/ depending on the repo
           if [ -f "synology/package.json" ]; then
             PKG_JSON="synology/package.json"

@@ -1,4 +1,4 @@
-# CPUTemp package - build notes
+# CPUTemp package - build notes 
 
 ## What's solid
 - `package.json`, `config`, `api.cgi` structure, `postinst` sudoers pattern —

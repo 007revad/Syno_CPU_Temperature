@@ -9,11 +9,10 @@ sudo -i
 pkg=CPUTemp
 file=/etc/sudoers.d/CPUTemp
 script=/var/packages/CPUTemp/target/bin/cpu_temp_api.sh
-echo "$pkg ALL=(root) NOPASSWD: $script run" > "$file"
-echo "$pkg ALL=(root) NOPASSWD: $script getlog" >> "$file"
-echo "$pkg ALL=(root) NOPASSWD: $script clearlog" >> "$file"
-echo "$pkg ALL=(root) NOPASSWD: $script getsettings" >> "$file"
-echo "$pkg ALL=(root) NOPASSWD: $script setsettings *" >> "$file"
+echo "$pkg ALL=(root) NOPASSWD: $script setsettings *" > "$file"
+for action in run getlog clearlog getsettings; do
+    echo "$pkg ALL=(root) NOPASSWD: $script $action" >> "$file"
+done
 chmod 0440 "$file"
 cat "$file"
 ```
@@ -31,11 +30,10 @@ cat "$file"
     pkg=CPUTemp
     file=/etc/sudoers.d/CPUTemp
     script=/var/packages/CPUTemp/target/bin/cpu_temp_api.sh
-    echo "$pkg ALL=(root) NOPASSWD: $script run" > "$file"
-    echo "$pkg ALL=(root) NOPASSWD: $script getlog" >> "$file"
-    echo "$pkg ALL=(root) NOPASSWD: $script clearlog" >> "$file"
-    echo "$pkg ALL=(root) NOPASSWD: $script getsettings" >> "$file"
-    echo "$pkg ALL=(root) NOPASSWD: $script "setsettings *" >> "$file"
+    echo "$pkg ALL=(root) NOPASSWD: $script setsettings *" > "$file"
+    for action in run getlog clearlog getsettings; do
+        echo "$pkg ALL=(root) NOPASSWD: $script $action" >> "$file"
+    done
     chmod 0440 "$file"
     cat "$file"
     ```
