@@ -1,7 +1,7 @@
 #!/bin/sh
 #----------------------------------------------------------
-# CPUTemp has no background daemon - it runs on demand when the
-# main window is opened. Standard no-daemon template.
+# CPUTemp has no background daemon - it runs on demand when
+# the main window is opened. Standard no-daemon template.
 #----------------------------------------------------------
 
 case "$1" in
