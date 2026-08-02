@@ -79,11 +79,12 @@ if match:
 }
 
 build_schedule() {
-    local hour="$1"
+    local repeat_hour="$1"
+    local start_hour="$2"
     if [[ "$API_VER" -eq 4 ]]; then
-        printf '{"date_type":0,"hour":0,"minute":0,"repeat_hour":%s,"repeat_min":0,"repeat_date":1001,"week_day":"0,1,2,3,4,5,6","monthly_week":[],"last_work_hour":0,"version":4}' "$hour"
+        printf '{"date_type":0,"hour":%s,"minute":0,"repeat_hour":%s,"repeat_min":0,"repeat_date":1001,"week_day":"0,1,2,3,4,5,6","monthly_week":[],"last_work_hour":0,"version":4}' "$start_hour" "$repeat_hour"
     else
-        printf '{"date_type":0,"hour":0,"minute":0,"repeat_hour":%s,"repeat_date":0,"week_day":"0,1,2,3,4,5,6","last_work_hour":0}' "$hour"
+        printf '{"date_type":0,"hour":%s,"minute":0,"repeat_hour":%s,"repeat_date":0,"week_day":"0,1,2,3,4,5,6","last_work_hour":0}' "$start_hour" "$repeat_hour"
     fi
 }
 
@@ -124,7 +125,15 @@ set)
         exit 1
     fi
 
-    SCHEDULE=$(build_schedule "$HOUR")
+    # Start the schedule at the next hour, not midnight - otherwise a
+    # user enabling this at, say, 1am would wait up to 23 hours for
+    # the first run. %-H strips any leading zero (date's default
+    # zero-padded output, e.g. "08", would otherwise be misread as an
+    # invalid octal literal by bash arithmetic).
+    CURRENT_HOUR=$(date +%-H)
+    START_HOUR=$(( (CURRENT_HOUR + 1) % 24 ))
+
+    SCHEDULE=$(build_schedule "$HOUR" "$START_HOUR")
     EXTRA=$(python3 -c "
 import json
 print(json.dumps({
