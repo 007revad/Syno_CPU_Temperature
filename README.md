@@ -37,31 +37,28 @@ There are 2 ways to install the package:
 
 <br>
 
-<!--- <p align="center">Description of image 2 goes here</p> --->
-<p align="center"><kbd><img src="/images/ds1821plus.png"></kbd></p>
-
-<br>
-
-<!--- <p align="center">Description of image 2 goes here</p> --->
+<p align="center">Settings window</p>
 <p align="center"><kbd><img src="/images/settings.png"></kbd></p>
 
 <br>
 
+<p align="center">AMD CPUs</p>
+<p align="center"><kbd><img src="/images/ds1821plus.png"></kbd></p>
 <!--- <p align="center">Description of image 2 goes here</p> --->
 <p align="center"><kbd><img src="/images/ds925plus.png"></kbd></p>
 
 <br>
 
-<!--- <p align="center">Description of image 2 goes here</p> --->
+<p align="center">Intel 4 core CPU</p>
 <p align="center"><kbd><img src="/images/ds720plus.png"></kbd></p>
 
 <br>
 
-<!--- <p align="center">Description of image 2 goes here</p> --->
+<p align="center">Realtek ARM CPU</p>
 <p align="center"><kbd><img src="/images/ds218.png"></kbd></p>
 
 <br>
 
-<!--- <p align="center">Description of image 2 goes here</p> --->
+<p align="center">DSM 6 Intel 2 core CPU</p>
 <p align="center"><kbd><img src="/images/ds1812plus.png"></kbd></p>
 
