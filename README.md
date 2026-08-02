@@ -62,3 +62,8 @@ There are 2 ways to install the package:
 <p align="center">DSM 6 Intel 2 core CPU</p>
 <p align="center"><kbd><img src="/images/ds1812plus.png"></kbd></p>
 
+<br>
+
+<p align="center">Select text and right-click to copy log</p>
+<p align="center"><kbd><img src="/images/save_log.png"></kbd></p>
+
