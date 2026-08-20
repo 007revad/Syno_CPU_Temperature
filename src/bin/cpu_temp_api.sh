@@ -106,6 +106,23 @@ self_heal() {
                 >> "${API_LOG_FILE}" 2>/dev/null
         fi
     fi
+
+    # Remove leftover sudoers rule from the pre-setuid-helper design.
+    # No longer independently exploitable once the scripts above are
+    # root-owned 555 (a NOPASSWD entry pointing at a script the
+    # invoking user can't write to isn't itself an escalation path),
+    # but it's unnecessary attack surface left behind on an in-place
+    # upgrade of an old install, and worth clearing rather than
+    # leaving as an inert-but-present entry. Only root can delete
+    # anything under /etc/sudoers.d/, so - same as the ownership
+    # fixes above - this only works from here, whether invoked via
+    # the helper (DSM7) or directly (DSM6).
+    SUDOERS_FILE="/etc/sudoers.d/${PKG_NAME}"
+    if [[ -f "$SUDOERS_FILE" ]]; then
+        rm -f "$SUDOERS_FILE"
+        echo "CPUTemp: self-heal removed leftover sudoers file $SUDOERS_FILE" \
+            >> "${API_LOG_FILE}" 2>/dev/null
+    fi
 }
 
 self_heal

@@ -1,5 +1,6 @@
-v2.0.6
+v2.0.7
 - Changed to no longer need the user to set elevated permissions.
+  - Installation deletes the old sudoers file if it exists.
 
 v1.0.5
 - Bug fix for setting log schedule's first run at midnight.
