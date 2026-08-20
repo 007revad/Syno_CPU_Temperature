@@ -1,7 +1,7 @@
 #!/bin/bash
 #----------------------------------------------------------
 # Creates/updates/disables the CPUTemp scheduled task via
-# SYNO.Core.TaskScheduler. Run as root (sudo'd from cpu_temp_api.sh).
+# SYNO.Core.TaskScheduler. Run as root (setuid'd from cpu_temp_api.sh).
 #
 # Confirmed 2026-07-31 against real test tasks:
 #   DSM 7 (api version 4): schedule needs repeat_hour, repeat_min,
@@ -44,7 +44,7 @@ TASK_NAME="CPU Temperature"
 COMMAND="${PKG_DEST}/bin/cpu_temp_api.sh run"
 
 # Same DSM-major-version detection syno_cpu_temp.sh itself uses.
-dsm=$(get_key_value /etc.defaults/VERSION majorversion)
+dsm=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION majorversion)
 if [[ $dsm -ge 7 ]]; then
     VAR_DIR="/var/packages/${PKG_NAME}/var"
     API_VER=4

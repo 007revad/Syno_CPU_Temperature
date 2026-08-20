@@ -22,6 +22,10 @@ BIN_DIR="${PKG_ROOT}/target/bin"
 
 # Get DSM major version
 dsm=$(/usr/syno/bin/synogetkeyvalue /etc.defaults/VERSION majorversion)
+if ! [[ "$dsm" =~ ^[0-9]+$ ]]; then
+    echo '{"success":false,"message":"Unable to determine DSM version"}' >&2
+    exit 1
+fi
 if [[ $dsm -ge 7 ]]; then
     VAR_DIR="${PKG_ROOT}/var"
 else
@@ -31,6 +35,7 @@ fi
 SCRIPT="${BIN_DIR}/syno_cpu_temp.sh"
 CONF_FILE="${VAR_DIR}/syno_cpu_temp.conf"
 LOG_FILE="${VAR_DIR}/syno_cpu_temp.log"
+API_LOG_FILE="${VAR_DIR}/api.log"
 DEFAULT_LOG_DAYS=7
 
 if [[ ! -f "$CONF_FILE" ]]; then
@@ -39,6 +44,71 @@ if [[ ! -f "$CONF_FILE" ]]; then
     synosetkeyvalue "$CONF_FILE" Log_Days 7
     synosetkeyvalue "$CONF_FILE" Log_Repeat_Hour "1"
 fi
+
+# ---------------------------------------------------------------------
+# Self-heal file ownership.
+#
+# bin/ and bin/modules/ are locked to 555 by postinst, which blocks
+# create/delete/rename of files inside them - but postinst runs as
+# CPUTemp, not root (confirmed 2026-08-15), so it can never chown
+# anything. Every file under bin/ therefore starts out still owned by
+# CPUTemp. An owner can always chmod u+w their own file regardless
+# of the containing directory's permissions, then overwrite its
+# content in place - confirmed exploitable against conf_lib.sh on
+# DS218 2026-08-15 despite bin/ being 555.
+#
+# Since this script always runs as root (invoked only via
+# synocputemp-helper's setuid), it closes that gap on every single
+# invocation: chown root:root + re-lock any file that's still
+# CPUTemp-owned. Cheap enough to run unconditionally rather than
+# caching a "did we already do this" flag - a handful of stat calls.
+#
+# Targets are found by globbing bin/ directly. Since both directories 
+# are 555 (no new files can be created), globbing what's actually on 
+# disk covers every possible overwrite target without trusting content
+# that could be the attack itself.
+#
+# LIMITATION: This cannot protect this script (cpu_temp_api.sh)
+# itself if it's been replaced before this code runs, the replacement
+# executes instead and this check never fires - self-heal logic in the
+# original file doesn't help once the original file is gone. This is
+# a narrow, accepted gap: the window between postinst completing and
+# the first invocation of this script (which happens automatically on
+# first page load via getstate). Everything this function iterates
+# over is fully self-healing from that point forward; this file itself
+# is the one exception.
+self_heal() {
+    local f owner
+    for f in "$BIN_DIR"/*.sh "$BIN_DIR"/*.py "$0"; do
+        [[ -f "$f" ]] || continue
+        owner="$(stat -c '%U' "$f" 2>/dev/null)"
+        if [[ "$owner" != "root" ]]; then
+            chown root:root "$f" 2>/dev/null
+            chmod 555 "$f" 2>/dev/null
+            echo "CPUTemp: self-heal secured $f (was owned by $owner)" \
+                >> "${API_LOG_FILE}" 2>/dev/null
+        fi
+    done
+
+    # syno_cpu_temp.conf is data, not code - root still writes it on every
+    # save. 600 rather than 555: no group/other bits at all, since
+    # root bypasses the mode entirely and the only thing left to
+    # control is whether CPUTemp can read config values (some,
+    # e.g. config_backup_remote_user/_remote_ip, are worth keeping
+    # off a wider read path even though nothing currently depends on
+    # that confidentiality).
+    if [[ -f "$CONF_FILE" ]]; then
+        owner="$(stat -c '%U' "$CONF_FILE" 2>/dev/null)"
+        if [[ "$owner" != "root" ]]; then
+            chown root:root "$CONF_FILE" 2>/dev/null
+            chmod 600 "$CONF_FILE" 2>/dev/null
+            echo "CPUTemp: self-heal secured $CONF_FILE (was owned by $owner)" \
+                >> "${API_LOG_FILE}" 2>/dev/null
+        fi
+    fi
+}
+
+self_heal
 
 ACTION="$1"
 shift
@@ -52,14 +122,14 @@ prune_log() {
 
     local days
     days=$(synogetkeyvalue "$CONF_FILE" Log_Days 2>/dev/null)
-    [ -n "$days" ] || days="$DEFAULT_LOG_DAYS"
+    [[ "$days" =~ ^[0-9]+$ ]] || days="$DEFAULT_LOG_DAYS"
 
-    python3 -c "
-import re
+    LOG_FILE="$LOG_FILE" DAYS="$days" python3 -c "
+import os, re
 from datetime import datetime, timedelta
 
-log_file = '${LOG_FILE}'
-days = int('${days}')
+log_file = os.environ['LOG_FILE']
+days = int(os.environ['DAYS'])
 cutoff = datetime.now() - timedelta(days=days)
 ts_re = re.compile(r'^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) - ')
 
@@ -155,15 +225,31 @@ setsettings)
 
     TASK_SETUP="${BIN_DIR}/task_setup.sh"
     if [[ "$LOG_ENABLED" == "yes" && -n "$FREQUENCY" ]]; then
-        "$TASK_SETUP" set "$FREQUENCY" >>"${VAR_DIR}/api.log" 2>&1
+        TASK_OUTPUT=$("$TASK_SETUP" set "$FREQUENCY" 2>>"${VAR_DIR}/api.log")
     else
-        "$TASK_SETUP" remove >>"${VAR_DIR}/api.log" 2>&1
+        TASK_OUTPUT=$("$TASK_SETUP" remove 2>>"${VAR_DIR}/api.log")
+    fi
+    echo "$TASK_OUTPUT" >> "${VAR_DIR}/api.log"
+
+    if echo "$TASK_OUTPUT" | grep -q '"success":false'; then
+        echo "$TASK_OUTPUT"
+        exit 1
     fi
 
     echo '{"success":true}'
     ;;
 
-*)
+removeschedule)
+    TASK_OUTPUT=$("${BIN_DIR}/task_setup.sh" remove 2>>"${VAR_DIR}/api.log")
+    echo "$TASK_OUTPUT" >> "${VAR_DIR}/api.log"
+    if echo "$TASK_OUTPUT" | grep -q '"success":false'; then
+        echo "$TASK_OUTPUT"
+        exit 1
+    fi
+    echo '{"success":true}'
+    ;;
+
+    *)
     echo '{"success":false,"message":"Unknown action"}'
     exit 1
     ;;
