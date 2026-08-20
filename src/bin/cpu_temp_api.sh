@@ -85,7 +85,7 @@ self_heal() {
         if [[ "$owner" != "root" ]]; then
             chown root:root "$f" 2>/dev/null
             chmod 555 "$f" 2>/dev/null
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')]CPUTemp: self-heal secured $f (was owned by $owner)" \
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] CPUTemp: self-heal secured $f (was owned by $owner)" \
                 >> "${API_LOG_FILE}" 2>/dev/null
         fi
     done

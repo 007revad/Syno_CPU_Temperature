@@ -8,7 +8,9 @@
       "appWindow": "SYNO.SDS.CPUTemp.MainWindow",
       "allowMultiInstance": false,
       "allowStandalone": true,
-      "allUsers": true
+      "allUsers": true,
+      "grantPrivilege": "all",
+      "advanceGrantPrivilege": true
     },
     "SYNO.SDS.CPUTemp.MainWindow": {
       "type": "lib",
