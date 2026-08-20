@@ -19,7 +19,6 @@ log_message() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$VAR_DIR/install.log" 2>/dev/null || echo "$1"
 }
 
-mkdir -p "$VAR_DIR" 2>/dev/null || true
 echo "" >> "$VAR_DIR/install.log"
 
 log_message "Post-installation starting for package: $PKG_NAME"
@@ -49,7 +48,7 @@ log_message "Secured cpu_temp_api.sh"
 # Must be after "chmod 555" and "chmod +x" for files in these folders
 chmod 555 "$BIN_DIR" 2>/dev/null                     # Blocks delete/recreate exploit
 chmod 555 "$SBIN_DIR" 2>/dev/null                    # Blocks delete/recreate exploit
-chmod 555 "$TARGET_DIR/bin/helper" 2>/dev/null             # Blocks delete/recreate/rename exploit
+chmod 555 "$TARGET_DIR/bin/helper" 2>/dev/null       # Blocks delete/recreate/rename exploit
 log_message "Secured bin, sbin and helper folders"
 
 # Lock down target folder

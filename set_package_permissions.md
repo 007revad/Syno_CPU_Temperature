@@ -1,7 +1,7 @@
 ## How to set the package permissions
 
 **NOTE:**
-Only versions older than v2.0.6 need these steps.
+Only versions older than v2.0.8 need these steps.
 
 There are 2 ways you can set the required permissions for the package.
 
