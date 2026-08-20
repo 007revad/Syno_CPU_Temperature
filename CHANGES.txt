@@ -1,5 +1,5 @@
 v2.0.9
-- Package adds itself to "Control Panel > Application Permissions" with only Administrators allowed to see or run the package.
+- Package adds itself to DSM 7's "Control Panel > Application Permissions" with only Administrators allowed to see or run the package.
   - You can the permissions in "Control Panel > Application Permissions".
 
 v2.0.8
