@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get release tag
         id: get_latest_tag
@@ -175,7 +175,7 @@ jobs:
 
       - name: Upload Package
         if: steps.check_assets.outputs.spk_count == '0'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.SPK_PREFIX }}-${{ steps.arch_label.outputs.label }}-${{ steps.dsm_suffix.outputs.suffix }}
           path: ./dist/*.spk
@@ -196,10 +196,10 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Checkout this repo (for synology/PACKAGE_ICON.PNG and package.json)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout 007revad.github.io (for thumbnails/)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: 007revad/007revad.github.io
           token: ${{ secrets.SYNC_TOKEN }}

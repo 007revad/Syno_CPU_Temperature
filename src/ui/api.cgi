@@ -88,10 +88,28 @@ json_response() {
     fi
 }
 
-# Runs the privileged wrapper via sudo -n and captures stdout/rc.
+HELPER="${BIN_DIR}/helper/synocputemp-helper"
+
+# Runs the privileged wrapper and captures stdout/rc.
+# DSM 7: CGI runs as the package user, so escalation goes through the
+# setuid helper, which enforces its own fixed action/argc whitelist
+# before it ever calls into cpu_temp_api.sh.
+# DSM 6: CGI already runs as root, so cpu_temp_api.sh is called
+# directly - the DSM6 build doesn't ship the helper or conf/privilege
+# at all (both are stripped in the release workflow's noarch step).
 # Sets RUN_RC and RUN_OUT.
 run_privileged() {
-    RUN_OUT=$(sudo -n "$API_SCRIPT" "$@" 2>>"${LOG_FILE}")
+    if [[ $dsm -ge 7 ]]; then
+        if [[ ! -u "$HELPER" ]]; then
+            RUN_OUT="synocputemp-helper missing or not setuid"
+            RUN_RC=1
+            log "[ERROR] $RUN_OUT"
+            return
+        fi
+        RUN_OUT=$("$HELPER" "$@" 2>>"${LOG_FILE}")
+    else
+        RUN_OUT=$("$API_SCRIPT" "$@" 2>>"${LOG_FILE}")
+    fi
     RUN_RC=$?
 }
 
@@ -108,7 +126,7 @@ run)
     run_privileged run
     if [ "$RUN_RC" -ne 0 ] || [ -z "$RUN_OUT" ]; then
         log "[ERROR] run failed (rc=${RUN_RC}): ${RUN_OUT}"
-        json_response false "Failed to run syno_cpu_temp.sh. Check sudoers grant." ""
+        json_response false "Failed to run syno_cpu_temp.sh. Check the setuid helper is installed correctly." ""
     else
         echo "$RUN_OUT"
     fi

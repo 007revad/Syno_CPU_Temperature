@@ -1,6 +1,8 @@
-v2.0.7
+v2.0.8
 - Changed to no longer need the user to set elevated permissions.
   - Installation deletes the old sudoers file if it exists.
+- Settings window now shows the schedule as disabled if the user deleted the schedule from Task Scheduler instead of assuming the schedule was still enabled.
+- Changed to be secure against possible exploits.
 
 v1.0.5
 - Bug fix for setting log schedule's first run at midnight.

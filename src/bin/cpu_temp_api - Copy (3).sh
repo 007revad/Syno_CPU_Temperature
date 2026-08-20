@@ -85,8 +85,8 @@ self_heal() {
         if [[ "$owner" != "root" ]]; then
             chown root:root "$f" 2>/dev/null
             chmod 555 "$f" 2>/dev/null
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')]CPUTemp: self-heal secured $f (was owned by $owner)" \
-                >> "${API_LOG_FILE}" 2>/dev/null
+            echo "CPUTemp: self-heal secured $f (was owned by $owner)" \
+                >> "[$(date '+%Y-%m-%d %H:%M:%S')] ${API_LOG_FILE}" 2>/dev/null
         fi
     done
 
@@ -216,19 +216,6 @@ getsettings)
     LOG_REPEAT_HOUR=$(synogetkeyvalue "$CONF_FILE" Log_Repeat_Hour 2>/dev/null)
     [ -n "$LOG_DAYS" ] || LOG_DAYS="$DEFAULT_LOG_DAYS"
     [ -n "$LOG_REPEAT_HOUR" ] || LOG_REPEAT_HOUR="1"
-
-    # Reconcile against the actual scheduled task - conf file state can
-    # drift if the task was deleted directly in DSM's Task Scheduler,
-    # bypassing this package entirely.
-    if [[ "${LOG_ENABLED,,}" == "yes" ]]; then
-        TASK_CHECK=$("${BIN_DIR}/task_setup.sh" find 2>>"${VAR_DIR}/api.log")
-        if ! echo "$TASK_CHECK" | grep -q '"exists":true'; then
-            LOG_ENABLED="no"
-            synosetkeyvalue "$CONF_FILE" Log "no"
-            echo "CPUTemp: getsettings reconciled Log=no (scheduled task missing)" >> "${VAR_DIR}/api.log"
-        fi
-    fi
-
     if [[ "${LOG_ENABLED,,}" == "yes" ]]; then ENABLED_JSON=true; else ENABLED_JSON=false; fi
     echo "{\"success\":true,\"log_enabled\":${ENABLED_JSON},\"log_days\":${LOG_DAYS},\"frequency\":${LOG_REPEAT_HOUR}}"
     ;;
