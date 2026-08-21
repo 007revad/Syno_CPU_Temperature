@@ -151,6 +151,17 @@ jobs:
           done
           ls -l ./dist
 
+      - name: Fix arch field in INFO for non-x86_64 DSM 7 platforms
+        if: steps.check_assets.outputs.spk_count == '0' && matrix.arch != 'kvmx64'
+        run: |
+          set -euo pipefail
+          spk=$(ls ./dist/*.spk | head -n1)
+          tmpdir=$(mktemp -d)
+          tar -xf "$spk" -C "$tmpdir"
+          sed -i '/^arch=/s/.*/arch="${{ steps.arch_label.outputs.label }}"/' "$tmpdir/INFO"
+          tar -cf "$spk" -C "$tmpdir" $(ls "$tmpdir")
+          rm -rf "$tmpdir"
+
       # Only needs to happen once - the noarch/DSM6 output doesn't
       # depend on which arch built it, and running it per matrix leg
       # would just produce duplicate, colliding artifacts.
