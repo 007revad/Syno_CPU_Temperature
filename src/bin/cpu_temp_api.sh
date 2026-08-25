@@ -123,6 +123,18 @@ self_heal() {
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] CPUTemp: self-heal removed leftover sudoers file $SUDOERS_FILE" \
             >> "${API_LOG_FILE}" 2>/dev/null
     fi
+
+    # Ensure api.log itself is CPUTemp-owned, not root-owned. If this
+    # function's own writes above are what create api.log for the
+    # first time (e.g. postinst's selfheal call on a fresh @appdata,
+    # before api.cgi's own touch/chown ever runs), the file is created
+    # as root:CPUTemp - and once that happens, api.cgi's unprivileged
+    # chown can never fix it (EPERM: not the owner). Root can always
+    # chown here, so fix it unconditionally rather than checking first.
+    if [[ -f "$API_LOG_FILE" ]]; then
+        chown "${PKG_NAME}:${PKG_NAME}" "$API_LOG_FILE" 2>/dev/null
+        chmod 644 "$API_LOG_FILE" 2>/dev/null
+    fi
 }
 
 self_heal

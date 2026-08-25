@@ -22,8 +22,11 @@ LOG_FILE="${VAR_DIR}/api.log"
 
 API_SCRIPT="${BIN_DIR}/cpu_temp_api.sh"
 
-touch "${LOG_FILE}"
-chmod 644 "${LOG_FILE}"
+if [[ ! -f "${LOG_FILE}" ]]; then
+    touch "${LOG_FILE}"
+    chown "${PKG_NAME}:${PKG_NAME}" "${LOG_FILE}"
+    chmod 644 "${LOG_FILE}"
+fi
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "${LOG_FILE}"
