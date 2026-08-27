@@ -1,3 +1,6 @@
+v2.0.12
+- Bug fix for not installing python3 in DSM 6 if python3 not installed.
+
 v2.0.11
 - Bug fix for "Failed to run syno_cpu_temp.sh" error.
 - Bug fix for "Could not clear log" error.
