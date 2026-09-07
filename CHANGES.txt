@@ -1,3 +1,6 @@
+v2.0.13
+- Bug fix for failing to install on alpine, alpine4k, armada370, armada375, armada38x, armadaxp, monaco, comcerto2k and evansport.
+
 v2.0.12
 - Bug fix for not installing python3 in DSM 6 if python3 not installed.
 
