@@ -18,6 +18,9 @@ on:
         required: false
         default: ''
 
+permissions:
+  contents: write
+
 jobs:
   build-test-spk:
     name: Build Test Package
@@ -70,6 +73,19 @@ jobs:
             *) echo "::error::No display label mapped for arch '${{ matrix.arch }}'"; exit 1 ;;
           esac
           echo "label=$label" >> $GITHUB_OUTPUT
+
+      # NEW: what actually goes in INFO's arch= field
+      - name: Map arch to INFO install-arch list
+        id: install_arch
+        run: |
+          case "${{ matrix.arch }}" in
+            kvmx64) archlist="x86_x64" ;;
+            rtd1296) archlist="armv8" ;;
+            armada38x) archlist="alpine alpine4k armada370 armada375 armada38x armadaxp monaco comcerto2k" ;;
+            evansport) archlist="evansport" ;;
+            *) echo "::error::No install-arch list mapped for '${{ matrix.arch }}'"; exit 1 ;;
+          esac
+          echo "archlist=$archlist" >> $GITHUB_OUTPUT
 
       - name: Synology Package Builder Github Action
         uses: 007revad/synology-package-builder@main
